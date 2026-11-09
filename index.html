@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One Piece Watch & Read Order Checklist (Ep 500+)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Custom Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Firebase JS SDK (V11) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Global Firebase Config Initialization
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'onepiece-watch-order';
+    let firebaseConfig = {};
+    try {
+      firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    } catch(e) {
+      console.warn("Firebase config not available; fallback to local mode");
+    }
+
+    if (firebaseConfig.apiKey) {
+      const app = initializeApp(firebaseConfig);
+      window.db = getFirestore(app);
+      window.auth = getAuth(app);
+      window.appId = appId;
+      
+      const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+      if (token) {
+        signInWithCustomToken(window.auth, token).catch(() => signInAnonymously(window.auth));
+      } else {
+        signInAnonymously(window.auth);
+      }
+    }
+  </script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            header: ['Cinzel', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            pirate: {
+              red: '#D9383A',
+              gold: '#F4A261',
+              dark: '#1C1917',
+              navy: '#1D3557',
+              sand: '#FFFBEB',
+              cardLight: '#FFFFFF',
+              cardDark: '#262626',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.05);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(217, 56, 58, 0.4);
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(217, 56, 58, 0.7);
+    }
+  </style>
+</head>
+<body class="bg-amber-50/40 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 min-h-screen transition-colors duration-200">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // --- FULL MASTER DATA DEFINITION (EPISODE 1 TO PRESENT) ---
+    const CHECKLIST_DATA = [
+      {
+        sagaId: 'eastblue',
+        sagaTitle: 'East Blue Saga (Episodes 1 – 61)',
+        badgeText: 'Ep 1 – 61',
+        borderColor: 'border-yellow-500',
+        items: [
+          { id: 'item-1-1', type: 'eps', title: 'Episodes 1 – 8' },
+          { id: 'item-1-2', type: 'special', title: 'OVA: Defeat Him! The Pirate Ganzack (1998 - Pre-Anime OVA)' },
+          { id: 'item-1-3', type: 'eps', title: 'Episodes 9 – 18' },
+          { id: 'item-1-4', type: 'movie', title: 'Movie 1: One Piece: The Movie (2000)' },
+          { id: 'item-1-5', type: 'eps', title: 'Episodes 19 – 53' },
+          { id: 'item-1-6', type: 'special', title: 'TV Special 1: Adventure in the Ocean\'s Navel (2000)' },
+          { id: 'item-1-7', type: 'special', title: 'Short: Jango\'s Dance Carnival (2001)' },
+          { id: 'item-1-8', type: 'movie', title: 'Movie 2: Clockwork Island Adventure (2001)' },
+          { id: 'item-1-9', type: 'eps', title: 'Episodes 54 – 61' }
+        ]
+      },
+      {
+        sagaId: 'alabasta',
+        sagaTitle: 'Alabasta Saga (Episodes 62 – 135)',
+        badgeText: 'Ep 62 – 135',
+        borderColor: 'border-amber-600',
+        items: [
+          { id: 'item-62-1', type: 'movie', title: 'Movie 3: Chopper\'s Kingdom on the Island of Strange Animals (2002)' },
+          { id: 'item-62-2', type: 'eps', title: 'Episode 92' },
+          { id: 'item-62-3', type: 'special', title: 'Short: Dream Soccer King (2002)' },
+          {
+            id: 'item-62-4',
+            type: 'cover',
+            title: 'Cover Story: Jango\'s Dance Paradise',
+            link: 'https://imgur.com/a/j3BCPUu'
+          },
+          {
+            id: 'item-62-5',
+            type: 'eps',
+            title: 'Episodes 62 – 115',
+            warning: '⚠️ Opening 3 Warning: Skip OP 3 from Ep 116–130 to avoid major character spoilers! Safe to watch at Ep 131.'
+          },
+          { id: 'item-62-6', type: 'eps', title: 'Episodes 116 – 138' },
+          { id: 'item-62-7', type: 'movie', title: 'Movie 4: Dead End Adventure (2003)' },
+          { id: 'item-62-8', type: 'special', title: 'TV Special 2: Open Upon the Great Sea! A Father\'s Huge, HUGE Dream! (2003)' },
+          {
+            id: 'item-62-9',
+            type: 'cover',
+            title: 'Cover Story: Hatchan\'s Sea-Floor Stroll',
+            link: 'https://imgur.com/a/YnAxdiD'
+          }
+        ]
+      },
+      {
+        sagaId: 'skypeia',
+        sagaTitle: 'Sky Island (Skypeia) Saga (Episodes 136 – 206)',
+        badgeText: 'Ep 136 – 206',
+        borderColor: 'border-sky-400',
+        items: [
+          { id: 'item-136-1', type: 'eps', title: 'Episodes 139 – 195' },
+          {
+            id: 'item-136-2',
+            type: 'cover',
+            title: 'Cover Story: Wapol\'s Omnivorous Hurrah',
+            link: 'https://imgur.com/a/xx5Fb3v'
+          },
+          { id: 'item-136-3', type: 'eps', title: 'Episodes 196 – 206' },
+          {
+            id: 'item-136-4',
+            type: 'cover',
+            title: 'Cover Story: Ace\'s Great Blackbeard Search',
+            link: 'https://imgur.com/a/kuqSaGo'
+          },
+          { id: 'item-136-5', type: 'eps', title: 'Episodes 207 – 219' },
+          { id: 'item-136-6', type: 'special', title: 'TV Special 3: Protect! The Last Great Performance (2003)' },
+          { id: 'item-136-7', type: 'special', title: 'Short: Take Aim! The Pirate Baseball King (2004)' },
+          { id: 'item-136-8', type: 'movie', title: 'Movie 5: The Cursed Holy Sword (2004)' }
+        ]
+      },
+      {
+        sagaId: 'water7',
+        sagaTitle: 'Water 7 & Enies Lobby Saga (Episodes 207 – 325)',
+        badgeText: 'Ep 207 – 325',
+        borderColor: 'border-blue-600',
+        items: [
+          { id: 'item-207-1', type: 'eps', title: 'Episodes 220 – 224' },
+          { id: 'item-207-2', type: 'movie', title: 'Movie 6: Baron Omatsuri and the Secret Island (2005)' },
+          { id: 'item-207-3', type: 'movie', title: 'Movie 7: The Giant Mechanical Soldier of the Karakuri Castle (2006)' },
+          {
+            id: 'item-207-4',
+            type: 'cover',
+            title: 'Cover Story: Gedatsu\'s Accidental Blue-Sea Life',
+            link: 'https://imgur.com/a/8omeL9v'
+          },
+          {
+            id: 'item-207-5',
+            type: 'eps',
+            title: 'Episodes 225 – 263',
+            warning: '⚠️ Opening 6 Warning: Skip OP 6 from Ep 264–278 to avoid major storyline spoilers.'
+          },
+          {
+            id: 'item-207-6',
+            type: 'eps',
+            title: 'Episodes 264 – 290 (Skip 291 & 292 for later)',
+            note: 'Episodes 291 & 292 are out-of-continuity feudal AU stories. Queued for intermission break.'
+          },
+          {
+            id: 'item-207-7',
+            type: 'eps',
+            title: 'Episodes 293 – 302 (Skip 303 for later)',
+            note: 'Episode 303 is an out-of-continuity feudal AU story.'
+          },
+          { id: 'item-207-8', type: 'eps', title: 'Episodes 304 – 325' },
+          {
+            id: 'item-207-9',
+            type: 'cover',
+            title: 'Cover Story: Miss Goldenweek\'s "Operation: Meet Baroque Works"',
+            link: 'https://imgur.com/a/HJPtmeD'
+          }
+        ]
+      },
+      {
+        sagaId: 'thrillerbark',
+        sagaTitle: 'Thriller Bark Saga (Episodes 326 – 384)',
+        badgeText: 'Ep 326 – 384',
+        borderColor: 'border-indigo-600',
+        items: [
+          { id: 'item-326-1', type: 'eps', title: 'Episodes 326 – 335' },
+          {
+            id: 'item-326-2',
+            type: 'eps',
+            title: 'Episode 336 (Out-of-Continuity Special)',
+            note: 'Fun standalone episode with a small minor reference later in canon.'
+          },
+          { id: 'item-326-3', type: 'eps', title: 'Episodes 337 – 384' },
+          { id: 'item-326-4', type: 'special', title: 'OVA: Romance Dawn Story (2008)' },
+          {
+            id: 'item-326-5',
+            type: 'cover',
+            title: 'Cover Story: Where They Are Now (Skypeia)',
+            link: 'https://imgur.com/a/YsHFyiR'
+          },
+          { id: 'item-326-6', type: 'movie', title: 'Movie 11: One Piece 3D: Straw Hat Chase (2011)' },
+          { id: 'item-326-7', type: 'special', title: 'Short: One Piece 3D: Trap Coaster (2011)' },
+          { id: 'item-326-8', type: 'special', title: 'Crossover 1: Toriko Ep 1 & One Piece Ep 492' },
+          {
+            id: 'item-326-9',
+            type: 'cover',
+            title: 'Cover Story: Water 7: Where They Are Now',
+            link: 'https://imgur.com/a/HhcVDKY'
+          }
+        ]
+      },
+      {
+        sagaId: 'summitwar',
+        sagaTitle: 'Summit War (Paramount War) Saga (Episodes 385 – 516)',
+        badgeText: 'Ep 385 – 516',
+        borderColor: 'border-red-700',
+        items: [
+          {
+            id: 'item-385-1',
+            type: 'eps',
+            title: 'Episodes 385 – 405 (Skip 406 & 407 for later)',
+            note: 'Episodes 406 & 407 are feudal AU specials.'
+          },
+          {
+            id: 'item-385-2',
+            type: 'eps',
+            title: 'Episodes 408 – 425 (Skip 426–429 for immediate flashback watch)',
+            note: 'Eps 426–429 are Strong World film tie-ins.'
+          },
+          { id: 'item-385-3', type: 'eps', title: 'Episodes 430 – 456' },
+          {
+            id: 'item-385-4',
+            type: 'special',
+            title: 'Short: Strong World Episode 0 (2009)',
+            warning: '⚠️ SKIP THE FIRST MINUTE! The opening minute shows end-of-movie scenes.'
+          },
+          { id: 'item-385-5', type: 'eps', title: 'Episodes 426 – 429 (Strong World Movie Setup Episodes)' },
+          { id: 'item-385-6', type: 'movie', title: 'Movie 10: Strong World (2009)' },
+          { id: 'item-385-7', type: 'eps', title: 'Episodes 457 – 516 (End of Pre-Timeskip Era)' }
+        ]
+      },
+      {
+        sagaId: 'postwar',
+        sagaTitle: 'Post-War Intermission & Retellings Era (2011 – 2012)',
+        badgeText: 'Ep 500 – 516 Break',
+        borderColor: 'border-orange-500',
+        items: [
+          { 
+            id: 'item-500-2', 
+            type: 'special', 
+            title: 'TV Special 4: Detective Memoirs of Chief Straw Hat Luffy (End of Year Special)',
+            note: 'Out-of-continuity feud-era historical AU setting up alternate reality episodes.',
+            badgeTag: 'NON-CANON'
+          },
+          { 
+            id: 'item-500-3', 
+            type: 'eps', 
+            title: 'Out-of-Continuity Alternate Reality Marathon: Episodes 291, 292, 303, 406, 407',
+            note: 'Retrospective watch spot for skipped Edo-period AU episodes.',
+            badgeTag: 'SKIPPABLE AU'
+          },
+          { 
+            id: 'item-500-4', 
+            type: 'movie', 
+            title: 'Movie 8: Desert Princess and the Pirates (Alabasta Retelling)',
+            note: 'Condenses the 39-episode Alabasta Arc into a 90-minute movie.',
+            badgeTag: 'RETELLING'
+          },
+          { 
+            id: 'item-500-5', 
+            type: 'movie', 
+            title: 'Movie 9: Episode of Chopper Plus: Bloom in Winter (Drum Island Retelling)',
+            note: 'Alternate "What-If" timeline of Drum Island featuring Franky and Robin in the crew.',
+            badgeTag: 'WHAT-IF RETELLING'
+          }
+        ]
+      },
+      {
+        sagaId: 'fishman',
+        sagaTitle: 'Fish-Man Island Saga (2011 – 2012)',
+        badgeText: 'Ep 517 – 574',
+        borderColor: 'border-cyan-500',
+        items: [
+          { id: 'item-517-1', type: 'eps', title: 'Episodes 517 – 541' },
+          { id: 'item-517-2', type: 'special', title: 'Crossover 2: Toriko Ep 51 & One Piece Ep 542 (Aired April 2012)' },
+          { id: 'item-517-3', type: 'eps', title: 'Episodes 543 – 560' },
+          { 
+            id: 'item-517-4', 
+            type: 'special', 
+            title: 'TV Special 5: Episode of Nami (Tears of a Navigator)',
+            note: 'Modern re-animation of the Arlong Park Arc.',
+            badgeTag: 'RETELLING'
+          },
+          { id: 'item-517-5', type: 'eps', title: 'Episodes 561 – 574' }
+        ]
+      },
+      {
+        sagaId: 'punkhazard',
+        sagaTitle: 'Punk Hazard Saga & Film Z Era (2012 – 2013)',
+        badgeText: 'Ep 575 – 628',
+        borderColor: 'border-emerald-500',
+        items: [
+          { 
+            id: 'item-575-1', 
+            type: 'special', 
+            title: 'TV Special 6: Episode of Luffy (Adventure on Hand Island - Dec 2012)',
+            note: 'Preamble TV special tie-in for Film Z featuring original Hand Island story.'
+          },
+          { id: 'item-575-2', type: 'special', title: 'Short 6: Glorious Island (Film Z Prequel Short)' },
+          { id: 'item-575-3', type: 'movie', title: 'Movie 12: Film Z (Released Dec 2012)' },
+          {
+            id: 'item-575-4',
+            type: 'cover',
+            title: 'Cover Story: From the Decks of the World',
+            link: 'https://imgur.com/a/3Zva6i7',
+          },
+          { id: 'item-575-5', type: 'eps', title: 'Episodes 575 – 589' },
+          { id: 'item-575-6', type: 'special', title: 'Crossover 3: Toriko Ep 99 & One Piece Ep 590 (w/ Dragon Ball Z)' },
+          { id: 'item-575-7', type: 'eps', title: 'Episodes 591 – 625' },
+          {
+            id: 'item-575-8',
+            type: 'cover',
+            title: 'Cover Story: Caribou\'s Kehihihihi in the New World',
+            link: 'https://imgur.com/a/D8WmTCA',
+          },
+          {
+            id: 'item-575-9',
+            type: 'special',
+            title: 'TV Special 7: Episode of Merry (The Tale of One More Friend - Aug 2013)',
+            note: 'Retelling of Going Merry\'s journey. Watch the bookend framing scenes that connect to the story.',
+            badgeTag: 'RETELLING / RECAP'
+          },
+          {
+            id: 'item-575-10',
+            type: 'special',
+            title: 'Light Novel: One Piece: Ace\'s Story (Volumes 1 & 2)',
+            note: 'Official backstory novel following Ace\'s early journey leading up to joining Whitebeard.'
+          }
+        ]
+      },
+      {
+        sagaId: 'dressrosa',
+        sagaTitle: 'Dressrosa Saga & 3D2Y Era (2013 – 2016)',
+        badgeText: 'Ep 629 – 746',
+        borderColor: 'border-rose-500',
+        items: [
+          {
+            id: 'item-629-1',
+            type: 'eps',
+            title: 'Episodes 626 – 658',
+            warning: '⚠️ Opening 17 Warning: Skip OP 17 from Ep 629–635 to avoid spoilers.',
+          },
+          {
+            id: 'item-629-2',
+            type: 'special',
+            title: 'TV Special 8: 3D2Y (Overcoming Ace\'s Death! Luffy\'s Oath - Aug 2014)',
+            note: '15th Anniversary Special covering Luffy\'s 2-year training period with Rayleigh.',
+            warning: '⚠️ Skip end credits if you haven\'t finished Dressrosa yet!'
+          },
+          { id: 'item-629-3', type: 'eps', title: 'Episodes 659 – 706' },
+          { 
+            id: 'item-629-4', 
+            type: 'special', 
+            title: 'TV Special 9: Episode of Sabo (Bond of Three Brothers - Aug 2015)',
+            note: 'Recaps Marineford and Dressrosa from Sabo\'s POV with new backstory scenes.'
+          },
+          { id: 'item-629-5', type: 'eps', title: 'Episodes 707 – 722' },
+          {
+            id: 'item-629-6',
+            type: 'special',
+            title: 'TV Special 10: Adventure in Nebulandia (Dec 2015)',
+            note: 'Original non-canon special featuring the return of Foxy Pirates on a Haki-sealing island.'
+          },
+          { id: 'item-629-7', type: 'eps', title: 'Episodes 723 – 739' },
+          {
+            id: 'item-629-8',
+            type: 'cover',
+            title: 'Cover Story: Solo Journey of Jinbe, Knight of the Sea',
+            link: 'https://imgur.com/a/XQn0AQU',
+          },
+          { id: 'item-629-9', type: 'eps', title: 'Episodes 740 – 746' },
+          {
+            id: 'item-629-10',
+            type: 'cover',
+            title: 'Cover Story: From the Decks of the World: The 500,000,000 Man Arc',
+            link: 'https://imgur.com/a/BP874Gj',
+          }
+        ]
+      },
+      {
+        sagaId: 'wholecake',
+        sagaTitle: 'Zou & Whole Cake Island Era (2016 – 2019)',
+        badgeText: 'Ep 747 – 889',
+        borderColor: 'border-purple-500',
+        items: [
+          { id: 'item-747-1', type: 'eps', title: 'Episodes 747 – 750 (Silver Mine Arc - Film Gold Tie-in)' },
+          {
+            id: 'item-747-2',
+            type: 'movie',
+            title: 'TV Special 11: Heart of Gold + Short: Film Gold Ep 0 + Movie 13: Film Gold (July 2016)',
+            note: 'Watch in this exact sequence for the full Gran Tesoro storyline.'
+          },
+          { id: 'item-747-3', type: 'eps', title: 'Episodes 751 – 806' },
+          {
+            id: 'item-747-4',
+            type: 'special',
+            title: 'TV Special 12: Episode of East Blue (Aired Aug 2017)',
+            note: 'High-definition 20th anniversary retelling of all 5 East Blue origin stories.',
+            warning: '⚠️ Credit Warning: End credits contain future character spoilers!',
+            badgeTag: 'RETELLING'
+          },
+          {
+            id: 'item-747-5',
+            type: 'special',
+            title: 'TV Special 13: Episode of Skypeia (Aired Aug 2018)',
+            note: 'Condensed 2-hour retelling of the Skypeia Arc.',
+            badgeTag: 'RETELLING'
+          },
+          {
+            id: 'item-747-6',
+            type: 'eps',
+            title: 'Episodes 807 – 877',
+            warning: '⚠️ Opening 22 Warning: Skip OP 22 from Ep 892–913.',
+          },
+          {
+            id: 'item-747-7',
+            type: 'cover',
+            title: 'Cover Story: Stories of the Self-Proclaimed Straw Hat Grand Fleet',
+            link: 'https://imgur.com/a/JwVkjEr',
+          }
+        ]
+      },
+      {
+        sagaId: 'wano',
+        sagaTitle: 'Wano Country & Stampede Era (2019 – 2023)',
+        badgeText: 'Ep 890 – 1086',
+        borderColor: 'border-red-600',
+        items: [
+          { id: 'item-878-1', type: 'eps', title: 'Episodes 878 – 894 (Skip 895 & 896 for Stampede setup)' },
+          { 
+            id: 'item-878-2', 
+            type: 'movie', 
+            title: 'Episodes 895 & 896 (Cidre Guild Arc) + Movie 14: Stampede (August 2019)',
+            note: '20th Anniversary Film & TV tie-in arc.' 
+          },
+          { id: 'item-878-3', type: 'eps', title: 'Episodes 897 – 906' },
+          { 
+            id: 'item-878-4', 
+            type: 'special', 
+            title: 'Episode 907 (20th Anniversary Romance Dawn Special - Oct 2019)',
+            note: 'Adaptation of Oda\'s original 1996 Romance Dawn pilot manga version.',
+            badgeTag: 'SPECIAL MANGA ADAPTATION'
+          },
+          { id: 'item-878-5', type: 'eps', title: 'Episodes 908 – 916' },
+          {
+            id: 'item-878-6',
+            type: 'cover',
+            title: 'Cover Story: "Gang" Bege\'s Oh My Family',
+            link: 'https://imgur.com/a/HtP8fla',
+          },
+          {
+            id: 'item-878-7',
+            type: 'eps',
+            title: 'Episodes 917 – 1028',
+            warning: '⚠️ Opening 23 v2 Warning: Skip OP 23 from Ep 976–988.',
+          },
+          {
+            id: 'item-878-8',
+            type: 'movie',
+            title: 'Episodes 1029 & 1030 + TV Special: Shanks + Movie 15: Film Red (Aug 2022)',
+            note: 'Uta & Shanks TV prequel episodes + Film Red movie.'
+          },
+          { id: 'item-878-9', type: 'eps', title: 'Episodes 1031 – 1086' },
+          {
+            id: 'item-878-10',
+            type: 'cover',
+            title: 'Cover Story: Germa 66\'s Ahh... An Emotionless Excursion (PART 1 ONLY)',
+            link: 'https://imgur.com/a/fHsYkqW',
+            warning: '⚠️ Read Part 1 only to prevent anime spoilers.',
+          }
+        ]
+      },
+      {
+        sagaId: 'egghead',
+        sagaTitle: 'Egghead Arc & Modern Era (2024+)',
+        badgeText: 'Ep 1087 – Present',
+        borderColor: 'border-amber-400',
+        items: [
+          {
+            id: 'item-1087-1',
+            type: 'special',
+            title: 'OVA: Monsters 103 Mercies Dragon Damnation (Jan 2024)',
+            note: 'Adaptation of Oda\'s 1994 One-Shot featuring Ryuma the Samurai (Netflix).'
+          },
+          { id: 'item-1087-2', type: 'eps', title: 'Episodes 1087 – 1115' },
+          { 
+            id: 'item-1087-3', 
+            type: 'special', 
+            title: 'Special: One Piece Fan Letter (Aired Oct 20, 2024)', 
+            note: '✨ 25th Anniversary Masterpiece. Civilian perspective during Return to Sabaody.' 
+          },
+          { id: 'item-1087-4', type: 'eps', title: 'Episodes 1116 – Present' }
+        ]
+      }
+    ];
+
+    // Helper icon rendering component
+    const Icon = ({ name, className = "w-4 h-4" }) => {
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      }, [name]);
+      return <i data-lucide={name} className={className}></i>;
+    };
+
+    function App() {
+      // Load saved progress from localStorage by default
+      const [checkedItems, setCheckedItems] = useState(() => {
+        try {
+          const saved = localStorage.getItem('onepiece_watch_order_ep500');
+          return saved ? JSON.parse(saved) : {};
+        } catch (e) {
+          return {};
+        }
+      });
+
+      const [filter, setFilter] = useState('all');
+      const [searchQuery, setSearchQuery] = useState('');
+      const [darkMode, setDarkMode] = useState(() => {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      });
+
+      // Cloud Sharing States
+      const [roomId, setRoomId] = useState('');
+      const [activeRoom, setActiveRoom] = useState('');
+      const [isSyncing, setIsSyncing] = useState(false);
+      const [copied, setCopied] = useState(false);
+      const [showShareModal, setShowShareModal] = useState(false);
+
+      // Check URL search params for room code on mount
+      useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomFromUrl = urlParams.get('room');
+        if (roomFromUrl) {
+          joinRoom(roomFromUrl.toUpperCase());
+        }
+      }, []);
+
+      // Realtime Firestore Listener when in a Shared Room
+      useEffect(() => {
+        if (!activeRoom || !window.db || !window.auth?.currentUser) return;
+        setIsSyncing(true);
+
+        const docRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'rooms', activeRoom);
+        const unsubscribe = window.onSnapshot(docRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            if (data && data.checkedItems) {
+              setCheckedItems(data.checkedItems);
+            }
+          } else {
+            // Create initial room state if it doesn't exist
+            window.setDoc(docRef, { checkedItems, updatedAt: Date.now() });
+          }
+          setIsSyncing(false);
+        }, (error) => {
+          console.error("Firestore sync error:", error);
+          setIsSyncing(false);
+        });
+
+        return () => unsubscribe();
+      }, [activeRoom]);
+
+      // Save to localStorage (Local mode) or sync to Firestore (Room mode)
+      const updateCheckedState = (newChecked) => {
+        setCheckedItems(newChecked);
+        try {
+          localStorage.setItem('onepiece_watch_order_ep500', JSON.stringify(newChecked));
+        } catch (e) {}
+
+        if (activeRoom && window.db && window.auth?.currentUser) {
+          const docRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'rooms', activeRoom);
+          window.setDoc(docRef, { checkedItems: newChecked, updatedAt: Date.now() }, { merge: true });
+        }
+      };
+
+      // Create or Join Room
+      const joinRoom = (targetRoom) => {
+        const cleanRoom = (targetRoom || roomId).trim().toUpperCase();
+        if (!cleanRoom) return;
+        setActiveRoom(cleanRoom);
+        // Update URL query string without reloading page
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('room', cleanRoom);
+        window.history.pushState({}, '', newUrl);
+        setShowShareModal(false);
+      };
+
+      const leaveRoom = () => {
+        setActiveRoom('');
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('room');
+        window.history.pushState({}, '', newUrl);
+      };
+
+      const createNewRoom = () => {
+        const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        joinRoom(newCode);
+      };
+
+      const copyShareLink = () => {
+        const shareUrl = window.location.href;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(shareUrl);
+        } else {
+          const input = document.createElement('input');
+          input.value = shareUrl;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand('copy');
+          document.body.removeChild(input);
+        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      };
+
+      // Toggle dark mode class on body
+      useEffect(() => {
+        if (darkMode) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }, [darkMode]);
+
+      // Total item calculations
+      const allItems = useMemo(() => CHECKLIST_DATA.flatMap(saga => saga.items), []);
+      const totalCount = allItems.length;
+      const completedCount = useMemo(() => allItems.filter(item => checkedItems[item.id]).length, [allItems, checkedItems]);
+      const percentCompleted = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
+
+      const toggleItem = (id) => {
+        const updated = { ...checkedItems, [id]: !checkedItems[id] };
+        updateCheckedState(updated);
+      };
+
+      // Select All / Deselect All
+      const toggleAll = (selectState) => {
+        const newChecked = {};
+        allItems.forEach(item => {
+          newChecked[item.id] = selectState;
+        });
+        updateCheckedState(newChecked);
+      };
+
+      // Helper badge renderer
+      const getTypeTag = (type, badgeTag) => {
+        if (badgeTag) {
+          return <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 uppercase tracking-wider">{badgeTag}</span>;
+        }
+        switch (type) {
+          case 'movie':
+            return <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-700 dark:text-red-400 border border-red-500/30 uppercase tracking-wider">MOVIE</span>;
+          case 'special':
+            return <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30 uppercase tracking-wider">SPECIAL / OVA</span>;
+          case 'cover':
+            return <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">MANGA COVER STORY</span>;
+          default:
+            return <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-500/30 uppercase tracking-wider">CANON EPISODES</span>;
+        }
+      };
+
+      // Filtered data based on search and selected category
+      const filteredSagas = useMemo(() => {
+        return CHECKLIST_DATA.map(saga => {
+          const matchingItems = saga.items.filter(item => {
+            const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                  (item.note && item.note.toLowerCase().includes(searchQuery.toLowerCase()));
+            
+            let matchesFilter = true;
+            if (filter === 'completed') matchesFilter = !!checkedItems[item.id];
+            if (filter === 'remaining') matchesFilter = !checkedItems[item.id];
+            if (filter === 'movies') matchesFilter = item.type === 'movie' || item.type === 'special';
+            if (filter === 'cover') matchesFilter = item.type === 'cover';
+
+            return matchesSearch && matchesFilter;
+          });
+
+          return { ...saga, items: matchingItems };
+        }).filter(saga => saga.items.length > 0);
+      }, [searchQuery, filter, checkedItems]);
+
+      return (
+        <div class="max-w-5xl mx-auto px-4 py-8">
+          {/* Header */}
+          <header class="mb-8 text-center bg-white dark:bg-zinc-900 rounded-2xl p-6 sm:p-8 shadow-sm border border-amber-200/60 dark:border-zinc-800">
+            <div class="flex items-center justify-between mb-4">
+              <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50">
+                <Icon name="anchor" className="w-3.5 h-3.5" />
+                Episode 1 to Present (1115+)
+              </span>
+              <div class="flex items-center gap-2">
+                <button 
+                  onClick={() => setShowShareModal(true)}
+                  class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-pirate-gold/20 text-pirate-navy dark:text-amber-300 hover:bg-pirate-gold/30 transition-all border border-amber-500/30">
+                  <Icon name="share-2" className="w-3.5 h-3.5" />
+                  {activeRoom ? `Room: ${activeRoom}` : 'Share Webapp Link'}
+                </button>
+                <button 
+                  onClick={() => setDarkMode(!darkMode)}
+                  class="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition">
+                  <Icon name={darkMode ? 'sun' : 'moon'} className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <h1 class="font-header text-3xl sm:text-4xl font-extrabold text-pirate-red dark:text-red-500 tracking-tight mb-2">
+              ONE PIECE ULTIMATE WATCH & READ ORDER
+            </h1>
+            <p class="text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto mb-6">
+              Full community spoiler-free watching guide from East Blue to Egghead Arc. Track your personal viewing progress locally or create a shared room to watch with friends!
+            </p>
+
+            {/* Overall Progress Bar */}
+            <div class="max-w-xl mx-auto bg-amber-50 dark:bg-zinc-800/80 p-4 rounded-xl border border-amber-200/50 dark:border-zinc-700">
+              <div class="flex justify-between items-center text-xs font-bold mb-2">
+                <span class="text-zinc-700 dark:text-zinc-300 flex items-center gap-1">
+                  <Icon name="check-circle" className="w-4 h-4 text-emerald-500" /> Total Journey Progress
+                </span>
+                <span class="text-pirate-red dark:text-red-400">{completedCount} / {totalCount} Completed ({percentCompleted}%)</span>
+              </div>
+              <div class="w-full bg-zinc-200 dark:bg-zinc-700 h-3 rounded-full overflow-hidden">
+                <div 
+                  class="bg-gradient-to-r from-pirate-gold to-pirate-red h-full transition-all duration-300"
+                  style={{ width: `${percentCompleted}%` }}>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Share Modal */}
+          {showShareModal && (
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <div class="bg-white dark:bg-zinc-900 border border-amber-200 dark:border-zinc-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                <div class="flex justify-between items-center mb-4">
+                  <h3 class="font-header text-lg font-bold text-pirate-navy dark:text-amber-400 flex items-center gap-2">
+                    <Icon name="users" className="w-5 h-5 text-pirate-red" /> Watch Together & Share
+                  </h3>
+                  <button onClick={() => setShowShareModal(false)} class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
+                    <Icon name="x" className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <p class="text-xs text-zinc-600 dark:text-zinc-400 mb-4">
+                  By default, your progress is saved privately on your device. You can copy the main link to share with anyone for their personal use, or join a Shared Room to sync checkmarks in real-time with friends.
+                </p>
+
+                <div class="space-y-4">
+                  <div class="p-3 bg-amber-50 dark:bg-zinc-800 rounded-xl border border-amber-200 dark:border-zinc-700">
+                    <span class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 block mb-1">Share Standard Webapp Link</span>
+                    <button 
+                      onClick={copyShareLink}
+                      class="w-full py-2 px-3 bg-pirate-navy text-white text-xs font-bold rounded-lg hover:bg-pirate-navy/90 transition flex items-center justify-center gap-2">
+                      <Icon name={copied ? "check" : "copy"} className="w-4 h-4" />
+                      {copied ? "Link Copied to Clipboard!" : "Copy Webapp Link to Share"}
+                    </button>
+                  </div>
+
+                  <div class="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700 space-y-2">
+                    <span class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 block">Shared Live Watch Room</span>
+                    {activeRoom ? (
+                      <div>
+                        <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">Connected to Room: {activeRoom}</p>
+                        <button 
+                          onClick={leaveRoom}
+                          class="w-full py-2 px-3 bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400 text-xs font-bold rounded-lg hover:bg-red-200 transition">
+                          Leave Shared Room (Switch back to Local)
+                        </button>
+                      </div>
+                    ) : (
+                      <div class="space-y-2">
+                        <div class="flex gap-2">
+                          <input 
+                            type="text" 
+                            placeholder="Enter Room Code..." 
+                            value={roomId}
+                            onChange={(e) => setRoomId(e.target.value)}
+                            class="flex-1 text-xs px-3 py-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 uppercase tracking-wider"
+                          />
+                          <button 
+                            onClick={() => joinRoom(roomId)}
+                            class="py-2 px-4 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition">
+                            Join
+                          </button>
+                        </div>
+                        <button 
+                          onClick={createNewRoom}
+                          class="w-full py-2 px-3 bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-bold rounded-lg hover:bg-amber-500/30 transition">
+                          Generate New Shared Room Code
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Search and Filters Toolbar */}
+          <div class="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-amber-200/60 dark:border-zinc-800 shadow-sm mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
+            {/* Search input */}
+            <div class="relative w-full md:w-72">
+              <input 
+                type="text"
+                placeholder="Search episodes, movies, cover stories..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                class="w-full pl-9 pr-4 py-2 text-xs rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-pirate-red/50"
+              />
+              <div class="absolute left-3 top-2.5 text-zinc-400">
+                <Icon name="search" className="w-4 h-4" />
+              </div>
+            </div>
+
+            {/* Filter buttons */}
+            <div class="flex flex-wrap gap-1.5 w-full md:w-auto justify-center">
+              {[
+                { key: 'all', label: 'All Items' },
+                { key: 'remaining', label: 'Remaining' },
+                { key: 'completed', label: 'Completed' },
+                { key: 'movies', label: 'Movies & Specials' },
+                { key: 'cover', label: 'Cover Stories' }
+              ].map(f => (
+                <button
+                  key={f.key}
+                  onClick={() => setFilter(f.key)}
+                  class={`text-xs px-3 py-1.5 rounded-lg font-medium transition ${
+                    filter === f.key 
+                      ? 'bg-pirate-red text-white font-semibold shadow-sm' 
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                  }`}>
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Quick Actions */}
+            <div class="flex items-center gap-2">
+              <button 
+                onClick={() => toggleAll(true)}
+                class="text-xs px-2.5 py-1.5 rounded bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 font-semibold hover:bg-emerald-100 transition">
+                Check All
+              </button>
+              <button 
+                onClick={() => toggleAll(false)}
+                class="text-xs px-2.5 py-1.5 rounded bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 font-semibold hover:bg-zinc-200 transition">
+                Uncheck All
+              </button>
+            </div>
+          </div>
+
+          {/* Saga Sections */}
+          <div class="space-y-6">
+            {filteredSagas.map(saga => {
+              const sagaCompletedCount = saga.items.filter(i => checkedItems[i.id]).length;
+              const sagaTotalCount = saga.items.length;
+              const isSagaDone = sagaCompletedCount === sagaTotalCount && sagaTotalCount > 0;
+
+              return (
+                <div 
+                  key={saga.sagaId}
+                  class={`bg-white dark:bg-zinc-900 rounded-xl p-5 border-t-4 ${saga.borderColor} border-x border-b border-amber-200/50 dark:border-zinc-800 shadow-sm transition`}>
+                  
+                  {/* Saga Header */}
+                  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 mb-4 border-b border-zinc-100 dark:border-zinc-800 gap-2">
+                    <div>
+                      <h2 class="font-header text-lg font-bold text-pirate-navy dark:text-amber-400 flex items-center gap-2">
+                        {saga.sagaTitle}
+                        {isSagaDone && (
+                          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                            <Icon name="check-circle" className="w-3.5 h-3.5" /> Completed
+                          </span>
+                        )}
+                      </h2>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                      {sagaCompletedCount} / {sagaTotalCount} items
+                    </span>
+                  </div>
+
+                  {/* Saga Items List */}
+                  <div class="space-y-2.5">
+                    {saga.items.map(item => {
+                      const isChecked = !!checkedItems[item.id];
+                      return (
+                        <div 
+                          key={item.id}
+                          onClick={() => toggleItem(item.id)}
+                          class={`group p-3.5 rounded-lg border transition cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                            isChecked 
+                              ? 'bg-amber-50/40 dark:bg-zinc-800/40 border-emerald-500/30 text-zinc-400 dark:text-zinc-500' 
+                              : 'bg-white dark:bg-zinc-900/90 border-zinc-200/80 dark:border-zinc-800 hover:border-pirate-red/40 dark:hover:border-red-500/40'
+                          }`}>
+                          
+                          <div class="flex items-start gap-3">
+                            {/* Custom Checkbox */}
+                            <div class={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition flex-shrink-0 ${
+                              isChecked 
+                                ? 'bg-emerald-500 border-emerald-500 text-white' 
+                                : 'border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-800 group-hover:border-pirate-red'
+                            }`}>
+                              {isChecked && <Icon name="check" className="w-3.5 h-3.5 stroke-[3]" />}
+                            </div>
+
+                            {/* Title & Tag */}
+                            <div>
+                              <div class="flex flex-wrap items-center gap-2 mb-1">
+                                {getTypeTag(item.type, item.badgeTag)}
+                                <span class={`text-sm font-semibold ${isChecked ? 'line-through text-zinc-400 dark:text-zinc-500' : 'text-zinc-800 dark:text-zinc-200'}`}>
+                                  {item.title}
+                                </span>
+                              </div>
+
+                              {/* Warning badges if any */}
+                              {item.warning && (
+                                <p class="text-xs text-red-600 dark:text-red-400 font-medium mt-1 flex items-center gap-1">
+                                  <Icon name="alert-triangle" className="w-3.5 h-3.5 flex-shrink-0" />
+                                  {item.warning}
+                                </p>
+                              )}
+
+                              {/* Note if any */}
+                              {item.note && (
+                                <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1 italic">
+                                  Note: {item.note}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Link Button for Cover Stories */}
+                          {item.link && (
+                            <a 
+                              href={item.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              class="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 hover:bg-emerald-200 transition self-start sm:self-center">
+                              View Manga Pages <Icon name="external-link" className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Footer */}
+          <footer class="mt-12 text-center text-xs text-zinc-500 dark:text-zinc-500 py-6 border-t border-amber-200/50 dark:border-zinc-800">
+            <p>One Piece Ultimate Watch & Read Order • Designed for standard community viewing & manga cover story integration.</p>
+          </footer>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
